@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EvolveBench Open-Ended Task Scope Memo</title>
+    <style>
+      :root {
+        --bg: #f5f2ec;
+        --ink: #172026;
+        --muted: #63717a;
+        --line: #d7d0c4;
+        --panel: #fffdf8;
+        --soft: #f9f7f1;
+        --accent: #0f766e;
+        --accent-dark: #134e4a;
+        --blue: #245c83;
+        --rust: #9f4a28;
+        --shadow: 0 16px 42px rgba(31, 38, 46, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          linear-gradient(180deg, rgba(15, 118, 110, 0.1), transparent 360px),
+          var(--bg);
+        color: var(--ink);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.52;
+      }
+
+      a {
+        color: var(--accent-dark);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 3px;
+      }
+
+      .shell {
+        width: min(1320px, calc(100vw - 34px));
+        margin: 0 auto;
+        padding: 34px 0 60px;
+      }
+
+      header {
+        display: grid;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .kicker {
+        color: var(--accent-dark);
+        font-size: 12px;
+        font-weight: 850;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        max-width: 1060px;
+        font-size: clamp(36px, 5vw, 66px);
+        line-height: 1.02;
+      }
+
+      .subtitle {
+        max-width: 980px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 18px;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .lang-button,
+      .nav-link {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        color: var(--ink);
+        border-radius: 8px;
+        padding: 9px 14px;
+        font-weight: 780;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .lang-button.active {
+        background: var(--accent-dark);
+        border-color: var(--accent-dark);
+        color: #fff;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 18px;
+        margin: 22px 0 28px;
+      }
+
+      .panel,
+      .card,
+      .quote,
+      .contract {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+      }
+
+      .panel {
+        padding: 22px;
+      }
+
+      .panel h2,
+      .section-title h2,
+      .card h3,
+      .contract h3 {
+        margin: 0;
+      }
+
+      .panel p {
+        margin: 10px 0 0;
+        color: var(--muted);
+      }
+
+      .definition {
+        border-left: 5px solid var(--accent);
+        background: #eef8f5;
+        color: #173c38;
+        font-weight: 820;
+        padding: 18px;
+        border-radius: 8px;
+      }
+
+      .definition p {
+        margin: 0;
+        color: #173c38;
+      }
+
+      .section-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 18px;
+        margin: 32px 0 14px;
+      }
+
+      .section-title p {
+        margin: 0;
+        max-width: 680px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .grid.two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .card {
+        padding: 18px;
+      }
+
+      .card h3 {
+        color: var(--accent-dark);
+        font-size: 18px;
+      }
+
+      ul {
+        margin: 10px 0 0;
+        padding-left: 20px;
+      }
+
+      li {
+        margin: 0 0 7px;
+      }
+
+      li:last-child {
+        margin-bottom: 0;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid rgba(23, 32, 38, 0.14);
+        border-radius: 999px;
+        color: var(--blue);
+        background: rgba(255, 255, 255, 0.68);
+        font-size: 12px;
+        font-weight: 800;
+        padding: 3px 8px;
+        margin-bottom: 9px;
+      }
+
+      .contract {
+        overflow: hidden;
+      }
+
+      .contract h3 {
+        padding: 15px 18px;
+        border-bottom: 1px solid var(--line);
+        background: #eee8dd;
+        font-size: 17px;
+      }
+
+      pre {
+        margin: 0;
+        padding: 18px;
+        overflow-x: auto;
+        background: #172026;
+        color: #e7f3f0;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", monospace;
+      }
+
+      .note {
+        padding: 16px 18px;
+        border: 1px solid var(--line);
+        border-left: 5px solid var(--rust);
+        border-radius: 8px;
+        background: var(--soft);
+        color: var(--muted);
+        margin-top: 16px;
+      }
+
+      .zh {
+        display: none;
+      }
+
+      body.show-zh .en {
+        display: none;
+      }
+
+      body.show-zh .zh {
+        display: initial;
+      }
+
+      body.show-zh section.zh,
+      body.show-zh div.zh {
+        display: block;
+      }
+
+      @media (max-width: 900px) {
+        .hero-grid,
+        .grid,
+        .grid.two {
+          grid-template-columns: 1fr;
+        }
+
+        .section-title {
+          display: grid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <div class="kicker">EvolveBench design memo · v2</div>
+        <h1>
+          <span class="en">Defining Open-Ended Tasks and Scoring Contracts</span>
+          <span class="zh">定义 Open-Ended Task 与配套 Scoring Contract</span>
+        </h1>
+        <p class="subtitle en">
+          A proposal for narrowing EvolveBench to bounded open-ended deliverable tasks: open solution paths, structured outputs, auditable grounding, and rubric-scored quality.
+        </p>
+        <p class="subtitle zh">
+          这是一版 EvolveBench scope / scoring memo：把 benchmark 缩到 bounded open-ended deliverable tasks，允许开放路径，但要求结构化输出、可审计 grounding 和 rubric 质量评分。
+        </p>
+        <div class="controls">
+          <button class="lang-button active" data-lang="en">English version</button>
+          <button class="lang-button" data-lang="zh">中文版</button>
+          <a class="nav-link" href="./">Benchmark literature table</a>
+        </div>
+      </header>
+
+      <section class="en">
+        <div class="hero-grid">
+          <article class="panel">
+            <h2>Core Position</h2>
+            <p>
+              Open-ended should not mean open-output. EvolveBench can allow many valid solution paths and many valid deliverables, while still requiring a bounded submission interface and a scoring contract.
+            </p>
+          </article>
+          <article class="definition">
+            <p>
+              Bounded open-ended deliverable tasks: tasks where multiple valid outputs may exist, but a valid output must satisfy an explicit deliverable schema, objective grounding requirements, and rubric-defined quality constraints.
+            </p>
+          </article>
+        </div>
+
+        <div class="section-title">
+          <h2>Candidate Task Scope</h2>
+          <p>Define what EvolveBench includes and excludes before defining the judge.</p>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <span class="tag">Include</span>
+            <h3>Tasks Worth Benchmarking</h3>
+            <ul>
+              <li>Research reports with citations and extractable claims</li>
+              <li>Professional deliverables with structured requirements</li>
+              <li>Multi-step analysis with evidence, decisions, and tradeoffs</li>
+              <li>Code, data, or document artifacts that can be inspected or tested</li>
+              <li>Tasks where objective subclaims can be grounded or checked</li>
+            </ul>
+          </article>
+          <article class="card">
+            <span class="tag">Exclude</span>
+            <h3>Tasks to Avoid for Now</h3>
+            <ul>
+              <li>Pure creative writing with no factual, structural, or constraint surface</li>
+              <li>Pure preference questions with no reference material or rubric</li>
+              <li>Tasks whose outputs cannot be parsed into fields, claims, or artifacts</li>
+              <li>Tasks where the only possible score is holistic expert impression</li>
+              <li>Tasks where failures cannot be localized or explained</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="section-title">
+          <h2>Output Format</h2>
+          <p>The model can write freely inside fields, but the submission itself should be machine-readable.</p>
+        </div>
+        <div class="grid">
+          <article class="card">
+            <h3>Final Answer</h3>
+            <ul>
+              <li>Short executive conclusion</li>
+              <li>May be compared or summarized by a judge</li>
+              <li>Should not be the only scoring surface</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Claims and Evidence</h3>
+            <ul>
+              <li>Every major factual claim is extractable</li>
+              <li>Each claim links to URLs, files, logs, data, or artifacts</li>
+              <li>Claims can be checked for support and contradiction</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Artifacts and Decisions</h3>
+            <ul>
+              <li>Produced files or deliverables are listed explicitly</li>
+              <li>Decisions include rationale and tradeoffs</li>
+              <li>Known limitations are surfaced by the agent</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="section-title">
+          <h2>Scoring Ideas</h2>
+          <p>Separate objective grounding from subjective quality; they should answer different questions.</p>
+        </div>
+        <div class="grid">
+          <article class="card">
+            <span class="tag">Objective</span>
+            <h3>Grounding Checks</h3>
+            <ul>
+              <li>Schema validity and required fields</li>
+              <li>Required artifacts exist and can be opened</li>
+              <li>Citations exist and support the linked claims</li>
+              <li>Provided references cover required facts</li>
+              <li>Executable tests, validators, or file checks pass</li>
+            </ul>
+          </article>
+          <article class="card">
+            <span class="tag">Subjective</span>
+            <h3>Rubric Quality</h3>
+            <ul>
+              <li>Completeness relative to the user goal</li>
+              <li>Usefulness and actionability</li>
+              <li>Reasoning quality and tradeoff handling</li>
+              <li>Clarity for the intended reader</li>
+              <li>Appropriate uncertainty and non-overclaiming</li>
+            </ul>
+          </article>
+          <article class="card">
+            <span class="tag">Calibration</span>
+            <h3>Judge Requirements</h3>
+            <ul>
+              <li>Report whether a criterion is deterministic, LLM-judged, or human-judged</li>
+              <li>For LLM judges, require human agreement or spot-check validation when possible</li>
+              <li>Every failed score should produce a localizable failure reason</li>
+              <li>Separate hard gates from partial-credit metrics</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="section-title">
+          <h2>Scoring Contract</h2>
+          <p>A task is benchmark-ready only if it declares how its output will be inspected.</p>
+        </div>
+        <div class="contract">
+          <h3>Example YAML</h3>
+          <pre><code>task_type: bounded_open_ended_deliverable
+submission_schema:
+  final_answer: string
+  deliverable: markdown_or_file
+  claims:
+    - claim: string
+      evidence: [url_or_file_or_artifact]
+      confidence: high | medium | low
+  artifacts:
+    - path: string
+      purpose: string
+  limitations: [string]
+
+scoring:
+  hard_gates:
+    - schema_valid
+    - required_artifacts_present
+    - no_fabricated_citations
+    - verifier_runs_without_error
+  objective_checks:
+    - claim_support_accuracy
+    - factual_consistency
+    - constraint_satisfaction
+    - artifact_validity
+  subjective_rubric:
+    - completeness
+    - usefulness
+    - reasoning_quality
+    - clarity
+  calibration:
+    judge_type: deterministic | llm_judge | human_expert | hybrid
+    human_validation_required_for_llm_judge: recommended
+    disagreement_examples_logged: true
+  pass_condition:
+    hard_gates: all_pass
+    objective_min_score: 0.75
+    subjective_min_score: 0.70</code></pre>
+        </div>
+
+        <p class="note">
+          Suggested stance: objective scoring decides whether the output is grounded and compliant; subjective scoring decides whether the grounded output is useful, complete, and well-reasoned.
+        </p>
+      </section>
+
+      <section class="zh">
+        <div class="hero-grid">
+          <article class="panel">
+            <h2>核心立场</h2>
+            <p>
+              Open-ended 不应该等于 open-output。EvolveBench 可以允许多种解题路径和多种有效产物，但提交接口和评分契约必须 bounded。
+            </p>
+          </article>
+          <article class="definition">
+            <p>
+              Bounded open-ended deliverable tasks：允许多个有效输出存在，但有效输出必须满足明确的 deliverable schema、objective grounding requirements 和 rubric-defined quality constraints。
+            </p>
+          </article>
+        </div>
+
+        <div class="section-title">
+          <h2>候选 Task Scope</h2>
+          <p>先定义 EvolveBench 收什么、不收什么，再定义 judge。</p>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <span class="tag">Include</span>
+            <h3>适合 benchmark 的任务</h3>
+            <ul>
+              <li>带 citations 和可抽取 claims 的 research report</li>
+              <li>有结构化要求的 professional deliverable</li>
+              <li>需要 evidence、decisions、tradeoffs 的多步分析</li>
+              <li>可检查或可测试的代码、数据、文档 artifact</li>
+              <li>objective subclaims 可以被 grounding 或 verification 的任务</li>
+            </ul>
+          </article>
+          <article class="card">
+            <span class="tag">Exclude</span>
+            <h3>暂时不适合的任务</h3>
+            <ul>
+              <li>纯创意写作，没有事实、结构或约束表面</li>
+              <li>纯偏好问题，没有 reference material 或 rubric</li>
+              <li>输出无法解析成 fields、claims、artifacts 的任务</li>
+              <li>只能靠专家整体 impression 打分的任务</li>
+              <li>失败原因不能定位或解释的任务</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="section-title">
+          <h2>Output Format</h2>
+          <p>模型可以在字段里自由表达，但 submission 本身应该 machine-readable。</p>
+        </div>
+        <div class="grid">
+          <article class="card">
+            <h3>Final Answer</h3>
+            <ul>
+              <li>短 executive conclusion</li>
+              <li>可以被 judge 比较或总结</li>
+              <li>不应该是唯一评分表面</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Claims and Evidence</h3>
+            <ul>
+              <li>主要 factual claim 必须可抽取</li>
+              <li>每个 claim 连接到 URL、文件、日志、数据或 artifact</li>
+              <li>claim 可以被检查 support 或 contradiction</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Artifacts and Decisions</h3>
+            <ul>
+              <li>产出的文件或 deliverable 要显式列出</li>
+              <li>decision 包含 rationale 和 tradeoffs</li>
+              <li>agent 需要暴露 known limitations</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="section-title">
+          <h2>Scoring 思路</h2>
+          <p>把 objective grounding 和 subjective quality 分开，它们回答的问题不同。</p>
+        </div>
+        <div class="grid">
+          <article class="card">
+            <span class="tag">Objective</span>
+            <h3>Grounding Checks</h3>
+            <ul>
+              <li>schema validity 和 required fields</li>
+              <li>required artifacts 存在且可打开</li>
+              <li>citation 存在并支持对应 claim</li>
+              <li>provided references 覆盖 required facts</li>
+              <li>executable tests、validators 或 file checks 通过</li>
+            </ul>
+          </article>
+          <article class="card">
+            <span class="tag">Subjective</span>
+            <h3>Rubric Quality</h3>
+            <ul>
+              <li>相对用户目标的 completeness</li>
+              <li>usefulness 和 actionability</li>
+              <li>reasoning quality 和 tradeoff handling</li>
+              <li>对目标读者的 clarity</li>
+              <li>合适的不确定性表达，避免 overclaiming</li>
+            </ul>
+          </article>
+          <article class="card">
+            <span class="tag">Calibration</span>
+            <h3>Judge Requirements</h3>
+            <ul>
+              <li>标明每个 criterion 是 deterministic、LLM-judged 还是 human-judged</li>
+              <li>LLM judge 尽量要求 human agreement 或 spot-check validation</li>
+              <li>每个失败分数都要给 localizable failure reason</li>
+              <li>hard gates 和 partial-credit metrics 分开</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="section-title">
+          <h2>Scoring Contract</h2>
+          <p>一个 task 只有声明了 output 怎样被检查，才算 benchmark-ready。</p>
+        </div>
+        <div class="contract">
+          <h3>Example YAML</h3>
+          <pre><code>task_type: bounded_open_ended_deliverable
+submission_schema:
+  final_answer: string
+  deliverable: markdown_or_file
+  claims:
+    - claim: string
+      evidence: [url_or_file_or_artifact]
+      confidence: high | medium | low
+  artifacts:
+    - path: string
+      purpose: string
+  limitations: [string]
+
+scoring:
+  hard_gates:
+    - schema_valid
+    - required_artifacts_present
+    - no_fabricated_citations
+    - verifier_runs_without_error
+  objective_checks:
+    - claim_support_accuracy
+    - factual_consistency
+    - constraint_satisfaction
+    - artifact_validity
+  subjective_rubric:
+    - completeness
+    - usefulness
+    - reasoning_quality
+    - clarity
+  calibration:
+    judge_type: deterministic | llm_judge | human_expert | hybrid
+    human_validation_required_for_llm_judge: recommended
+    disagreement_examples_logged: true
+  pass_condition:
+    hard_gates: all_pass
+    objective_min_score: 0.75
+    subjective_min_score: 0.70</code></pre>
+        </div>
+
+        <p class="note">
+          建议立场：objective scoring 判断输出是否 grounded and compliant；subjective scoring 判断 grounded output 是否 useful、complete、well-reasoned。
+        </p>
+      </section>
+    </main>
+
+    <script>
+      const buttons = document.querySelectorAll("[data-lang]");
+      const setLanguage = (lang) => {
+        document.body.classList.toggle("show-zh", lang === "zh");
+        document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+        buttons.forEach((button) => {
+          button.classList.toggle("active", button.dataset.lang === lang);
+        });
+      };
+
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => setLanguage(button.dataset.lang));
+      });
+    </script>
+  </body>
+</html>
