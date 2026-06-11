@@ -1,0 +1,1234 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Benchmark Task Definition Review</title>
+    <style>
+      :root {
+        --bg: #f5f2ec;
+        --ink: #172026;
+        --muted: #63717a;
+        --line: #d7d0c4;
+        --panel: #fffdf8;
+        --soft: #f9f7f1;
+        --accent: #0f766e;
+        --accent-dark: #134e4a;
+        --blue: #245c83;
+        --rust: #9f4a28;
+        --shadow: 0 16px 42px rgba(31, 38, 46, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          linear-gradient(180deg, rgba(15, 118, 110, 0.1), transparent 340px),
+          var(--bg);
+        color: var(--ink);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.48;
+      }
+
+      a {
+        color: var(--accent-dark);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 3px;
+      }
+
+      .shell {
+        width: min(1680px, calc(100vw - 34px));
+        margin: 0 auto;
+        padding: 34px 0 56px;
+      }
+
+      header {
+        display: grid;
+        gap: 16px;
+        margin-bottom: 22px;
+      }
+
+      .kicker {
+        color: var(--accent-dark);
+        font-size: 12px;
+        font-weight: 850;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        max-width: 1100px;
+        font-size: clamp(34px, 4.8vw, 62px);
+        line-height: 1.02;
+        letter-spacing: 0;
+      }
+
+      .subtitle {
+        max-width: 1040px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 17px;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .lang-button {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        color: var(--ink);
+        border-radius: 8px;
+        padding: 9px 14px;
+        font-weight: 780;
+        cursor: pointer;
+      }
+
+      .lang-button.active {
+        background: var(--accent-dark);
+        border-color: var(--accent-dark);
+        color: #fff;
+      }
+
+      .expand-cell {
+        width: 76px;
+      }
+
+      .expand-button {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+        color: var(--accent-dark);
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 820;
+        padding: 7px 10px;
+        white-space: nowrap;
+      }
+
+      .expand-button:hover {
+        border-color: var(--accent);
+        background: #eef8f5;
+      }
+
+      .detail-row {
+        display: none;
+        background: #fbfaf5 !important;
+      }
+
+      .detail-row.open {
+        display: table-row;
+      }
+
+      .detail-cell {
+        padding: 0;
+      }
+
+      .detail-panel {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 14px;
+        padding: 18px;
+        border-top: 1px solid var(--line);
+        background: #fffdf8;
+      }
+
+      .detail-box {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #f9f7f1;
+        padding: 14px;
+      }
+
+      .detail-box h3 {
+        margin: 0 0 8px;
+        color: var(--rust);
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .detail-box p {
+        margin: 0;
+      }
+
+      .detail-wide {
+        grid-column: 1 / -1;
+      }
+
+      .evidence-list {
+        display: grid;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .evidence-list li {
+        border-top: 1px solid var(--line);
+        padding-top: 10px;
+      }
+
+      .evidence-list li:first-child {
+        border-top: 0;
+        padding-top: 0;
+      }
+
+      .evidence-quote {
+        color: var(--accent-dark);
+        font-weight: 820;
+      }
+
+      .evidence-note {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+      }
+
+      .note {
+        margin: 18px 0 18px;
+        padding: 14px 16px;
+        border: 1px solid var(--line);
+        border-left: 4px solid var(--accent);
+        border-radius: 8px;
+        background: var(--panel);
+        color: var(--muted);
+        box-shadow: var(--shadow);
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .category-block {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 26px;
+      }
+
+      .category-title {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 18px;
+      }
+
+      .category-title h3 {
+        margin: 0;
+        font-size: 21px;
+      }
+
+      .category-title p {
+        margin: 0;
+        max-width: 760px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      table {
+        width: 100%;
+        min-width: 1380px;
+        border-collapse: collapse;
+      }
+
+      thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #eee8dd;
+        color: #28333a;
+        text-align: left;
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--line);
+        padding: 13px 14px;
+      }
+
+      tbody tr {
+        border-bottom: 1px solid var(--line);
+      }
+
+      tbody tr:nth-child(even) {
+        background: var(--soft);
+      }
+
+      tbody tr:last-child {
+        border-bottom: 0;
+      }
+
+      td {
+        vertical-align: top;
+        padding: 15px 14px;
+        font-size: 14px;
+      }
+
+      td ul,
+      .detail-box ul {
+        margin: 0;
+        padding-left: 18px;
+      }
+
+      td li,
+      .detail-box li {
+        margin: 0 0 5px;
+      }
+
+      td li:last-child,
+      .detail-box li:last-child {
+        margin-bottom: 0;
+      }
+
+      .name {
+        width: 160px;
+        font-weight: 850;
+        color: var(--accent-dark);
+      }
+
+      .type {
+        width: 180px;
+        color: var(--blue);
+        font-weight: 750;
+      }
+
+      .quote {
+        width: 280px;
+      }
+
+      .task {
+        width: 410px;
+      }
+
+      .judge {
+        width: 410px;
+      }
+
+      blockquote {
+        margin: 0;
+        padding: 10px 12px;
+        border-left: 4px solid var(--accent);
+        background: #edf7f4;
+        color: #173c38;
+        font-weight: 760;
+      }
+
+      .source {
+        display: block;
+        margin-top: 7px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 650;
+      }
+
+      .pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
+      }
+
+      .pill {
+        border: 1px solid rgba(23, 32, 38, 0.14);
+        border-radius: 999px;
+        padding: 3px 8px;
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .section-title {
+        margin: 30px 0 12px;
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        align-items: end;
+      }
+
+      .section-title h2 {
+        margin: 0;
+        font-size: 25px;
+      }
+
+      .section-title p {
+        margin: 0;
+        max-width: 680px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .sources {
+        margin-top: 24px;
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .sources h2 {
+        margin: 0 0 10px;
+        font-size: 22px;
+      }
+
+      .source-list {
+        columns: 2;
+        column-gap: 32px;
+        margin: 0;
+        padding-left: 18px;
+      }
+
+      .source-list li {
+        break-inside: avoid;
+        margin-bottom: 8px;
+        color: var(--muted);
+      }
+
+      .en {
+        display: none;
+      }
+
+      body.show-en .zh {
+        display: none;
+      }
+
+      body.show-en .en {
+        display: initial;
+      }
+
+      body.show-en section.en,
+      body.show-en div.en {
+        display: block;
+      }
+
+      @media (max-width: 760px) {
+        .shell {
+          width: min(100vw - 20px, 1680px);
+          padding-top: 22px;
+        }
+
+        .source-list {
+          columns: 1;
+        }
+
+        .detail-panel {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body class="show-en">
+    <main class="shell">
+      <header>
+        <div class="kicker">Benchmark task-definition memo</div>
+        <h1>
+          <span class="zh">Benchmark 如何定义 task 与 judge</span>
+          <span class="en">How Benchmarks Define Tasks and Judges</span>
+        </h1>
+        <p class="subtitle zh">
+          横向表格版：每一行是一个 benchmark，列出主定义句、任务形式、judge / oracle 设计；点展开可以看更多 task-definition 相关原文短 quote 和解释。
+        </p>
+        <p class="subtitle en">
+          Horizontal table version: each row is one benchmark; expand a row to see more task-definition source phrases and explanations.
+        </p>
+        <div class="controls" aria-label="Language switcher">
+          <button class="lang-button active" data-lang="en">English version</button>
+          <button class="lang-button" data-lang="zh">中文版</button>
+        </div>
+      </header>
+
+      <p class="note zh">
+        注：表格里放主定义整句；展开后补充同篇 paper 中更多 task 定义相关原文短 quote 和上下文解释。
+      </p>
+      <p class="note en">
+        Note: the table shows the main definition sentence; expanded rows add more task-definition source phrases and context.
+      </p>
+
+      <section class="zh" aria-label="中文任务定义表">
+        <div class="section-title">
+          <h2>中文版本</h2>
+          <p>只保留 benchmark 本身怎么定义 task，以及 judge / oracle 评什么。</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>展开</th>
+                <th>Benchmark</th>
+                <th>Task 类型</th>
+                <th>原文整句 quote</th>
+                <th>他们怎么定义 task</th>
+                <th>Judge / oracle 设计</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="name">Terminal-Bench</td>
+                <td class="type">Terminal agent task</td>
+                <td class="quote">
+                  <blockquote>“Each task features a unique environment, human-written solution, and comprehensive tests for verification.”</blockquote>
+                  <span class="source">Terminal-Bench paper</span>
+                </td>
+                <td class="task"><ul><li>独立 Linux terminal 环境</li><li>人类写的任务说明和解法</li><li>验证最终状态的测试</li><li>强调真实、困难、长程命令行工作</li></ul></td>
+                <td class="judge"><ul><li>运行测试脚本</li><li>检查文件、命令输出、程序行为、服务或环境状态</li><li>不固定解题路径</li><li>核心是最终状态可验证</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">CocoaBench</td>
+                <td class="type">Unified digital agent task</td>
+                <td class="quote">
+                  <blockquote>“Tasks are specified only by an instruction and an automatic evaluation function over the final output.”</blockquote>
+                  <span class="source">CocoaBench paper</span>
+                </td>
+                <td class="task"><ul><li>输入是 instruction</li><li>输出由 final-output evaluator 检查</li><li>任务需要组合视觉、搜索、代码能力</li><li>强调长程数字任务</li></ul></td>
+                <td class="judge"><ul><li>自动 evaluation function</li><li>只评估 final output</li><li>不绑定工具轨迹</li><li>不要求固定 workflow</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">OSWorld</td>
+                <td class="type">Computer-use task</td>
+                <td class="quote">
+                  <blockquote>“OSWorld can serve as a unified, integrated computer environment for assessing open-ended computer tasks that involve arbitrary applications.”</blockquote>
+                  <span class="source">OSWorld paper</span>
+                </td>
+                <td class="task"><ul><li>真实 OS / app 环境</li><li>开放式电脑操作任务</li><li>包含初始状态和自然语言目标</li><li>包含可交互应用和任务特定配置</li></ul></td>
+                <td class="judge"><ul><li>custom execution-based evaluation script</li><li>检查系统、应用、文件或配置状态</li><li>评估最终状态</li><li>不把点击序列当作唯一答案</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">SWE-bench</td>
+                <td class="type">Software engineering issue</td>
+                <td class="quote">
+                  <blockquote>“We find real-world software engineering to be a rich, sustainable, and challenging testbed for evaluating the next generation of language models.”</blockquote>
+                  <span class="source">SWE-bench paper</span>
+                </td>
+                <td class="task"><ul><li>instance 来自真实 GitHub issue / PR</li><li>输入是 codebase 和 issue 描述</li><li>输出是修改代码的 patch</li><li>目标是解决真实软件工程问题</li></ul></td>
+                <td class="judge"><ul><li>运行测试集</li><li>判断 patch 是否修复 issue</li><li>允许多种正确实现</li><li>以行为是否通过 regression / hidden tests 为准</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">GAIA</td>
+                <td class="type">General assistant question</td>
+                <td class="quote">
+                  <blockquote>“GAIA proposes real-world questions that require a set of fundamental abilities such as reasoning, multi-modality handling, web browsing, and generally tool-use proficiency.”</blockquote>
+                  <span class="source">GAIA paper</span>
+                </td>
+                <td class="task"><ul><li>现实问题</li><li>需要推理、工具、浏览或多模态处理</li><li>最终答案明确、短小、可比对</li><li>过程开放，答案封闭</li></ul></td>
+                <td class="judge"><ul><li>答案匹配</li><li>等价性判断</li><li>重点是最终答案正确性</li><li>不评估搜索路径本身</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">PaperBench</td>
+                <td class="type">Research replication task</td>
+                <td class="quote">
+                  <blockquote>“Agents must replicate 20 ICML 2024 Spotlight and Oral papers from scratch, including understanding paper contributions, developing a codebase, and successfully executing experiments.”</blockquote>
+                  <span class="source">PaperBench paper</span>
+                </td>
+                <td class="task"><ul><li>复现 AI research paper</li><li>从零理解贡献、开发代码、执行实验</li><li>复杂 deliverable</li><li>拆成子任务和明确评分点</li></ul></td>
+                <td class="judge"><ul><li>分层 rubric</li><li>支持 partial credit</li><li>评估代码、实验、结果、文档</li><li>不是单个 pass/fail 测试</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">MLR-Bench</td>
+                <td class="type">Open-ended ML research</td>
+                <td class="quote">
+                  <blockquote>“In this work, we introduce MLR-Bench, a comprehensive benchmark for evaluating AI agents on open-ended machine learning research.”</blockquote>
+                  <span class="source">MLR-Bench paper</span>
+                </td>
+                <td class="task"><ul><li>开放式 ML research</li><li>覆盖 idea generation、proposal、experimentation、paper writing</li><li>目标是研究产物</li><li>不是单一答案任务</li></ul></td>
+                <td class="judge"><ul><li>stagewise assessment</li><li>final paper evaluation</li><li>关注 idea、proposal、experiment、writing</li><li>特别检查实验有效性和结果可信度</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">Agents' Last Exam</td>
+                <td class="type">Economic long-horizon workflow</td>
+                <td class="quote">
+                  <blockquote>“This paper introduces Agents' Last Exam (ALE), a benchmark designed to evaluate AI agents on long-horizon, economically valuable, real-world tasks with verifiable outcomes.”</blockquote>
+                  <span class="source">Agents' Last Exam paper</span>
+                </td>
+                <td class="task"><ul><li>长程专业工作流</li><li>经济价值高、真实世界任务</li><li>覆盖非体力行业</li><li>按 O*NET / SOC 2018 组织任务分类</li></ul></td>
+                <td class="judge"><ul><li>强调 verifiable outcomes</li><li>报告 full pass rate</li><li>评估最终专业工作结果</li><li>不是单步问答评测</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">ClawBench</td>
+                <td class="type">Live web task</td>
+                <td class="quote">
+                  <blockquote>“Everyday online tasks offer a realistic yet unsolved testbed for evaluating the next generation of AI agents.”</blockquote>
+                  <span class="source">ClawBench paper</span>
+                </td>
+                <td class="task"><ul><li>日常生活和工作中的线上任务</li><li>运行在真实生产网站</li><li>包括购买、预约、职位申请、表单填写</li><li>覆盖多平台多类别</li></ul></td>
+                <td class="judge"><ul><li>两阶段 scoring：Stage 1 deterministic interception，Stage 2 LLM judge</li><li>Stage 1：sandbox request interceptor 按 task.json 的 eval_schema.url_pattern + method 匹配最终 outgoing HTTP request</li><li>Stage 2：LLM judge 只看 instruction + intercepted request body，返回 match true / false / null</li><li>final_pass = intercepted AND judge_match is true；不是 unit-test oracle</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">GDPval / GDPBench</td>
+                <td class="type">Knowledge-work deliverable</td>
+                <td class="quote">
+                  <blockquote>“Each GDPval task consists of two primary components: a request (often with reference files) and a deliverable (work product).”</blockquote>
+                  <span class="source">GDPval paper</span>
+                </td>
+                <td class="task"><ul><li>任务由 request 和 deliverable 组成</li><li>经常包含 reference files</li><li>基于行业专家真实工作产品</li><li>覆盖 44 个职业和高 GDP 行业</li></ul></td>
+                <td class="judge"><ul><li>论文 headline metric：human expert head-to-head / blinded pairwise comparison</li><li>专家看到 request + reference files + 多个匿名 deliverables，并排序/写 justification</li><li>reproducibility path：开源 220-task gold subset 的 prompts 和 reference files</li><li>公开 evals.openai.com automated grading service；论文称 experimental，不是完全等价于专家 oracle</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">Auto-ClawEval / ClawEnvKit</td>
+                <td class="type">Generated claw-like agent environment</td>
+                <td class="quote">
+                  <blockquote>“Using ClawEnvKit, we construct Auto-ClawEval, the first large-scale benchmark for claw-like agents, comprising 1,040 environments across 24 categories.”</blockquote>
+                  <span class="source">ClawEnvKit paper</span>
+                </td>
+                <td class="task"><ul><li>从自然语言 capability description 生成环境</li><li>包含 task specification</li><li>包含 tool interface 和 scoring configuration</li><li>Auto-ClawEval 有 1,040 个环境、24 类</li></ul></td>
+                <td class="judge"><ul><li>validator 检查 feasibility</li><li>检查 diversity、structural validity、internal consistency</li><li>scoring configuration 定义评分</li><li>completion 是主要评估轴</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">DeepResearch Bench</td>
+                <td class="type">Deep research report task</td>
+                <td class="quote">
+                  <blockquote>“DeepResearch Bench, a benchmark consisting of 100 PhD-level research tasks, each meticulously crafted by domain experts across 22 distinct fields.”</blockquote>
+                  <span class="source">DeepResearch Bench paper</span>
+                </td>
+                <td class="task"><ul><li>100 个 PhD-level research tasks</li><li>由领域专家跨 22 个领域设计</li><li>agent 需要多步 web exploration、retrieval、synthesis</li><li>输出 citation-rich research report</li></ul></td>
+                <td class="judge"><ul><li>RACE：report quality（LLM judge；human alignment evaluated on human-annotated subset）</li><li>RACE criteria：comprehensiveness / insight-depth / instruction-following / readability（LLM-generated criteria + reference-based scoring）</li><li>FACT：citation support / effective citations（web scraping + LLM judgment；human alignment reported via README）</li><li>human validation：human inter-annotator agreement baseline = 68.78%</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">MMDeepResearch-Bench</td>
+                <td class="type">Multimodal deep research report</td>
+                <td class="quote">
+                  <blockquote>“MMDR-Bench emphasizes report-style synthesis with explicit evidence use, where models must connect visual artifacts to sourced claims.”</blockquote>
+                  <span class="source">MMDeepResearch-Bench paper</span>
+                </td>
+                <td class="task"><ul><li>140 个 expert-crafted tasks</li><li>覆盖 21 个领域</li><li>每个任务提供 image-text bundle</li><li>要求多模态证据驱动的 report-style synthesis</li></ul></td>
+                <td class="judge"><ul><li>FLAE：report quality（LLM judge；human validation not reported in abstract）</li><li>TRACE：citation-grounded evidence alignment（自动/模型评估；human validation not reported in abstract）</li><li>MOSAIC：text-visual integrity / visual evidence support（自动/模型评估；human validation not reported in abstract）</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">DRBench</td>
+                <td class="type">Enterprise deep research task</td>
+                <td class="quote">
+                  <blockquote>“DRBench evaluates agents on multi-step queries that require identifying supporting facts from both the public web and private company knowledge base.”</blockquote>
+                  <span class="source">DRBench paper</span>
+                </td>
+                <td class="task"><ul><li>复杂、开放式 enterprise deep research tasks</li><li>任务 grounded in user personas 和 enterprise context</li><li>搜索空间包括 public web、company KB、emails、chat、cloud files</li><li>输出 coherent, well-structured reports</li></ul></td>
+                <td class="judge"><ul><li>评估维度：relevant insight recall、factual accuracy、report coherence/structure</li><li>human-in-the-loop verification：用于 task generation / task quality verification</li><li>LLM judge：abstract 中未明确说明是否用 LLM-as-judge</li><li>human validation/agreement：abstract 中未看到 judge-human agreement 数字</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">ReportBench</td>
+                <td class="type">Academic survey report task</td>
+                <td class="quote">
+                  <blockquote>“ReportBench leverages high-quality published survey papers available on arXiv as gold-standard references.”</blockquote>
+                  <span class="source">ReportBench paper</span>
+                </td>
+                <td class="task"><ul><li>用 survey paper 反推 domain-specific prompts</li><li>评估 deep research agent 生成 research report</li><li>任务关注学术综述式内容质量</li><li>输出需要引用文献并覆盖研究主题</li></ul></td>
+                <td class="judge"><ul><li>Cited literature quality：document type classification（LLM judge；human validation not reported）</li><li>Cited statements：supporting passage matching + consistency check（LLM judge；human validation not reported）</li><li>Non-cited claims：web-connected LLM fact-checking + majority vote（LLM judge；human validation not reported）</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">IDRBench</td>
+                <td class="type">Interactive deep research task</td>
+                <td class="quote">
+                  <blockquote>“IDRBench combines a modular multi-agent research framework with on-demand interaction, a scalable reference-grounded user simulator, and an interaction-aware evaluation suite.”</blockquote>
+                  <span class="source">IDRBench paper</span>
+                </td>
+                <td class="task"><ul><li>interactive deep research benchmark</li><li>研究目标可能 underspecified 且会演化</li><li>agent 可以 on-demand interaction</li><li>任务包含用户反馈和长文报告生成</li></ul></td>
+                <td class="judge"><ul><li>evaluation suite：interaction-aware，联合评估 quality、alignment、turn/token cost</li><li>user simulator：reference-grounded scalable user simulator</li><li>LLM judge：abstract 中未明确说明具体 judge model / LLM-as-judge 机制</li><li>human validation/agreement：abstract 中未看到 human agreement validation</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">BrowseComp</td>
+                <td class="type">Deep browsing short-answer task</td>
+                <td class="quote">
+                  <blockquote>“BrowseComp comprises 1,266 questions that require persistently navigating the internet in search of hard-to-find, entangled information.”</blockquote>
+                  <span class="source">BrowseComp paper</span>
+                </td>
+                <td class="task"><ul><li>1,266 个 web browsing questions</li><li>需要 persistent internet navigation</li><li>查找 hard-to-find, entangled information</li><li>最终答案短且可验证</li></ul></td>
+                <td class="judge"><ul><li>predicted answers are short</li><li>against reference answers 验证</li><li>自动或半自动 answer matching</li><li>测 deep search persistence 和 creativity</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">BrowseComp-V3</td>
+                <td class="type">Multimodal deep browsing task</td>
+                <td class="quote">
+                  <blockquote>“The benchmark emphasizes deep, multi-level, and cross-modal multi-hop reasoning.”</blockquote>
+                  <span class="source">BrowseComp-V3 paper</span>
+                </td>
+                <td class="task"><ul><li>300 个 curated challenging questions</li><li>跨 textual 和 visual modalities 搜索证据</li><li>强调 deep, multi-level, cross-modal multi-hop reasoning</li><li>证据必须 publicly searchable</li></ul></td>
+                <td class="judge"><ul><li>final-answer accuracy</li><li>expert-validated subgoal-driven process evaluation</li><li>分析 intermediate reasoning behaviors</li><li>保证可复现的 evidence accessibility</li></ul></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="en" aria-label="English task definition table">
+        <div class="section-title">
+          <h2>English Version</h2>
+          <p>This version keeps only the benchmark's own task definition and judge / oracle design.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Expand</th>
+                <th>Benchmark</th>
+                <th>Task Type</th>
+                <th>Full-Sentence Quote</th>
+                <th>How They Define the Task</th>
+                <th>Judge / Oracle Design</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="name">Terminal-Bench</td>
+                <td class="type">Terminal agent task</td>
+                <td class="quote">
+                  <blockquote>“Each task features a unique environment, human-written solution, and comprehensive tests for verification.”</blockquote>
+                  <span class="source">Terminal-Bench paper</span>
+                </td>
+                <td class="task"><ul><li>Standalone Linux terminal environment</li><li>Human-written instruction and solution</li><li>Verification tests for final state</li><li>Hard, realistic, long-horizon command-line work</li></ul></td>
+                <td class="judge"><ul><li>Execution-based tests</li><li>Check files, command outputs, behavior, services, or environment state</li><li>Solution path is open</li><li>Final verifiable state is central</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">CocoaBench</td>
+                <td class="type">Unified digital agent task</td>
+                <td class="quote">
+                  <blockquote>“Tasks are specified only by an instruction and an automatic evaluation function over the final output.”</blockquote>
+                  <span class="source">CocoaBench paper</span>
+                </td>
+                <td class="task"><ul><li>Input is an instruction</li><li>Final output is checked by an evaluator</li><li>Requires flexible composition of vision, search, and coding</li><li>Targets long-horizon digital tasks</li></ul></td>
+                <td class="judge"><ul><li>Automatic evaluation function</li><li>Checks final output</li><li>Does not depend on tool trajectory</li><li>Does not require a specific scaffold</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">OSWorld</td>
+                <td class="type">Computer-use task</td>
+                <td class="quote">
+                  <blockquote>“OSWorld can serve as a unified, integrated computer environment for assessing open-ended computer tasks that involve arbitrary applications.”</blockquote>
+                  <span class="source">OSWorld paper</span>
+                </td>
+                <td class="task"><ul><li>Real OS / app environment</li><li>Open-ended computer workflow</li><li>Initial state plus natural-language goal</li><li>Interactive applications and setup configuration</li></ul></td>
+                <td class="judge"><ul><li>Custom execution-based evaluation script</li><li>Checks OS, app, file, or configuration state</li><li>Evaluates final state</li><li>Does not canonize one click path</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">SWE-bench</td>
+                <td class="type">Software engineering issue</td>
+                <td class="quote">
+                  <blockquote>“We find real-world software engineering to be a rich, sustainable, and challenging testbed for evaluating the next generation of language models.”</blockquote>
+                  <span class="source">SWE-bench paper</span>
+                </td>
+                <td class="task"><ul><li>Instance comes from a real GitHub issue / PR</li><li>Input is repository plus issue description</li><li>Output is a code patch</li><li>Goal is real software issue resolution</li></ul></td>
+                <td class="judge"><ul><li>Run tests</li><li>Decide whether the patch resolves the issue</li><li>Allow multiple correct implementations</li><li>Behavioral tests are the oracle</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">GAIA</td>
+                <td class="type">General assistant question</td>
+                <td class="quote">
+                  <blockquote>“GAIA proposes real-world questions that require a set of fundamental abilities such as reasoning, multi-modality handling, web browsing, and generally tool-use proficiency.”</blockquote>
+                  <span class="source">GAIA paper</span>
+                </td>
+                <td class="task"><ul><li>Real-world questions</li><li>Require reasoning, tools, browsing, or multimodality</li><li>Resolve to an unambiguous final answer</li><li>Open process, closed answer</li></ul></td>
+                <td class="judge"><ul><li>Answer matching</li><li>Equivalence checking</li><li>Focus on final-answer correctness</li><li>Does not judge search path directly</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">PaperBench</td>
+                <td class="type">Research replication task</td>
+                <td class="quote">
+                  <blockquote>“Agents must replicate 20 ICML 2024 Spotlight and Oral papers from scratch, including understanding paper contributions, developing a codebase, and successfully executing experiments.”</blockquote>
+                  <span class="source">PaperBench paper</span>
+                </td>
+                <td class="task"><ul><li>Replicate an AI research paper</li><li>Understand contributions, build code, run experiments</li><li>Complex deliverable</li><li>Decomposed into subtasks and explicit criteria</li></ul></td>
+                <td class="judge"><ul><li>Hierarchical rubric</li><li>Partial credit</li><li>Scores code, experiments, results, and documentation</li><li>Not a single pass/fail test</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">MLR-Bench</td>
+                <td class="type">Open-ended ML research</td>
+                <td class="quote">
+                  <blockquote>“In this work, we introduce MLR-Bench, a comprehensive benchmark for evaluating AI agents on open-ended machine learning research.”</blockquote>
+                  <span class="source">MLR-Bench paper</span>
+                </td>
+                <td class="task"><ul><li>Open-ended ML research</li><li>Idea generation</li><li>Proposal formulation and experimentation</li><li>Paper writing as final artifact</li></ul></td>
+                <td class="judge"><ul><li>Stagewise assessment</li><li>Final paper evaluation</li><li>Checks idea, proposal, experiment, and writing quality</li><li>Special attention to validity of experiments and results</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">Agents' Last Exam</td>
+                <td class="type">Economic long-horizon workflow</td>
+                <td class="quote">
+                  <blockquote>“This paper introduces Agents' Last Exam (ALE), a benchmark designed to evaluate AI agents on long-horizon, economically valuable, real-world tasks with verifiable outcomes.”</blockquote>
+                  <span class="source">Agents' Last Exam paper</span>
+                </td>
+                <td class="task"><ul><li>Long-horizon professional workflows</li><li>Economically valuable, real-world tasks</li><li>Non-physical industries</li><li>Organized by O*NET / SOC 2018 taxonomy</li></ul></td>
+                <td class="judge"><ul><li>Emphasizes verifiable outcomes</li><li>Reports full pass rate</li><li>Evaluates final professional work result</li><li>Not a single-step QA benchmark</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">ClawBench</td>
+                <td class="type">Live web task</td>
+                <td class="quote">
+                  <blockquote>“Everyday online tasks offer a realistic yet unsolved testbed for evaluating the next generation of AI agents.”</blockquote>
+                  <span class="source">ClawBench paper</span>
+                </td>
+                <td class="task"><ul><li>Routine online activities</li><li>Live production websites</li><li>Purchases, appointments, applications, form filling</li><li>Multi-platform, multi-category workflows</li></ul></td>
+                <td class="judge"><ul><li>Two-stage scoring: deterministic interception, then LLM judge</li><li>Stage 1: sandbox request interceptor matches final outgoing HTTP request against task.json eval_schema.url_pattern + method</li><li>Stage 2: LLM judge sees instruction + intercepted request body and returns match true / false / null</li><li>final_pass = intercepted AND judge_match is true; not a unit-test oracle</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">GDPval / GDPBench</td>
+                <td class="type">Knowledge-work deliverable</td>
+                <td class="quote">
+                  <blockquote>“Each GDPval task consists of two primary components: a request (often with reference files) and a deliverable (work product).”</blockquote>
+                  <span class="source">GDPval paper</span>
+                </td>
+                <td class="task"><ul><li>Task consists of request and deliverable</li><li>Often includes reference files</li><li>Based on real expert work products</li><li>Covers 44 occupations and major GDP sectors</li></ul></td>
+                <td class="judge"><ul><li>Paper headline metric: human expert head-to-head / blinded pairwise comparison</li><li>Experts see request + reference files + anonymous deliverables, then rank and justify</li><li>Reproducibility path: open-source 220-task gold subset prompts and reference files</li><li>Public evals.openai.com automated grading service; described as experimental, not fully equivalent to expert oracle</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">Auto-ClawEval / ClawEnvKit</td>
+                <td class="type">Generated claw-like agent environment</td>
+                <td class="quote">
+                  <blockquote>“Using ClawEnvKit, we construct Auto-ClawEval, the first large-scale benchmark for claw-like agents, comprising 1,040 environments across 24 categories.”</blockquote>
+                  <span class="source">ClawEnvKit paper</span>
+                </td>
+                <td class="task"><ul><li>Generated from natural-language capability descriptions</li><li>Includes task specification</li><li>Includes tool interface and scoring configuration</li><li>Auto-ClawEval has 1,040 environments across 24 categories</li></ul></td>
+                <td class="judge"><ul><li>Validator checks feasibility</li><li>Checks diversity, structural validity, internal consistency</li><li>Scoring configuration defines evaluation</li><li>Completion is the main evaluation axis</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">DeepResearch Bench</td>
+                <td class="type">Deep research report task</td>
+                <td class="quote">
+                  <blockquote>“DeepResearch Bench, a benchmark consisting of 100 PhD-level research tasks, each meticulously crafted by domain experts across 22 distinct fields.”</blockquote>
+                  <span class="source">DeepResearch Bench paper</span>
+                </td>
+                <td class="task"><ul><li>100 PhD-level research tasks</li><li>Crafted by domain experts across 22 fields</li><li>Requires multi-step web exploration, retrieval, and synthesis</li><li>Outputs citation-rich research reports</li></ul></td>
+                <td class="judge"><ul><li>RACE: report quality (LLM judge; human alignment evaluated on human-annotated subset)</li><li>RACE criteria: comprehensiveness / insight-depth / instruction-following / readability (LLM-generated criteria + reference-based scoring)</li><li>FACT: citation support / effective citations (web scraping + LLM judgment; human alignment reported via README)</li><li>Human validation: human inter-annotator agreement baseline = 68.78%</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">MMDeepResearch-Bench</td>
+                <td class="type">Multimodal deep research report</td>
+                <td class="quote">
+                  <blockquote>“MMDR-Bench emphasizes report-style synthesis with explicit evidence use, where models must connect visual artifacts to sourced claims.”</blockquote>
+                  <span class="source">MMDeepResearch-Bench paper</span>
+                </td>
+                <td class="task"><ul><li>140 expert-crafted tasks</li><li>Covers 21 domains</li><li>Each task provides an image-text bundle</li><li>Requires multimodal evidence-grounded report synthesis</li></ul></td>
+                <td class="judge"><ul><li>FLAE: report quality (LLM judge; human validation not reported in abstract)</li><li>TRACE: citation-grounded evidence alignment (automated/model-based; human validation not reported in abstract)</li><li>MOSAIC: text-visual integrity / visual evidence support (automated/model-based; human validation not reported in abstract)</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">DRBench</td>
+                <td class="type">Enterprise deep research task</td>
+                <td class="quote">
+                  <blockquote>“DRBench evaluates agents on multi-step queries that require identifying supporting facts from both the public web and private company knowledge base.”</blockquote>
+                  <span class="source">DRBench paper</span>
+                </td>
+                <td class="task"><ul><li>Complex, open-ended enterprise deep research tasks</li><li>Grounded in user personas and enterprise context</li><li>Search spans public web, company KB, emails, chats, and cloud files</li><li>Outputs coherent, well-structured reports</li></ul></td>
+                <td class="judge"><ul><li>Evaluation dimensions: relevant insight recall, factual accuracy, report coherence/structure</li><li>Human-in-the-loop verification is described for task generation / task quality verification</li><li>LLM judge: not explicit in the abstract</li><li>Human validation/agreement: no judge-human agreement number found in the abstract</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">ReportBench</td>
+                <td class="type">Academic survey report task</td>
+                <td class="quote">
+                  <blockquote>“ReportBench leverages high-quality published survey papers available on arXiv as gold-standard references.”</blockquote>
+                  <span class="source">ReportBench paper</span>
+                </td>
+                <td class="task"><ul><li>Reverse-engineers prompts from survey papers</li><li>Evaluates generated research reports</li><li>Focuses on academic survey-style content quality</li><li>Outputs should cite literature and cover the research topic</li></ul></td>
+                <td class="judge"><ul><li>Cited literature quality: document type classification (LLM judge; human validation not reported)</li><li>Cited statements: supporting passage matching + consistency check (LLM judge; human validation not reported)</li><li>Non-cited claims: web-connected LLM fact-checking + majority vote (LLM judge; human validation not reported)</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">IDRBench</td>
+                <td class="type">Interactive deep research task</td>
+                <td class="quote">
+                  <blockquote>“IDRBench combines a modular multi-agent research framework with on-demand interaction, a scalable reference-grounded user simulator, and an interaction-aware evaluation suite.”</blockquote>
+                  <span class="source">IDRBench paper</span>
+                </td>
+                <td class="task"><ul><li>Interactive deep research benchmark</li><li>Research goals can be underspecified and evolving</li><li>Agent can use on-demand interaction</li><li>Tasks include user feedback and long-form report generation</li></ul></td>
+                <td class="judge"><ul><li>Evaluation suite: interaction-aware, jointly measuring quality, alignment, and turn/token cost</li><li>User simulator: scalable reference-grounded user simulator</li><li>LLM judge: concrete judge model / LLM-as-judge mechanism not explicit in the abstract</li><li>Human validation/agreement: no human agreement validation found in the abstract</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">BrowseComp</td>
+                <td class="type">Deep browsing short-answer task</td>
+                <td class="quote">
+                  <blockquote>“BrowseComp comprises 1,266 questions that require persistently navigating the internet in search of hard-to-find, entangled information.”</blockquote>
+                  <span class="source">BrowseComp paper</span>
+                </td>
+                <td class="task"><ul><li>1,266 web browsing questions</li><li>Requires persistent internet navigation</li><li>Searches for hard-to-find, entangled information</li><li>Final answers are short and verifiable</li></ul></td>
+                <td class="judge"><ul><li>Predicted answers are short</li><li>Checked against reference answers</li><li>Answer matching or equivalence checking</li><li>Measures deep-search persistence and creativity</li></ul></td>
+              </tr>
+              <tr>
+                <td class="name">BrowseComp-V3</td>
+                <td class="type">Multimodal deep browsing task</td>
+                <td class="quote">
+                  <blockquote>“The benchmark emphasizes deep, multi-level, and cross-modal multi-hop reasoning.”</blockquote>
+                  <span class="source">BrowseComp-V3 paper</span>
+                </td>
+                <td class="task"><ul><li>300 curated challenging questions</li><li>Evidence spans textual and visual modalities</li><li>Requires deep, multi-level, cross-modal multi-hop reasoning</li><li>Supporting evidence must be publicly searchable</li></ul></td>
+                <td class="judge"><ul><li>Final-answer accuracy</li><li>Expert-validated subgoal-driven process evaluation</li><li>Analyzes intermediate reasoning behavior</li><li>Evidence accessibility supports reproducibility</li></ul></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="sources" aria-label="Sources">
+        <h2>
+          <span class="zh">来源</span>
+          <span class="en">Sources</span>
+        </h2>
+        <ul class="source-list">
+          <li><a href="https://arxiv.org/abs/2601.11868">Terminal-Bench: Benchmarking Agents on Hard, Realistic Tasks in Command Line Interfaces</a></li>
+          <li><a href="https://arxiv.org/abs/2604.11201">CocoaBench: Evaluating Unified Digital Agents in the Wild</a></li>
+          <li><a href="https://arxiv.org/abs/2404.07972">OSWorld: Benchmarking Multimodal Agents for Open-Ended Tasks in Real Computer Environments</a></li>
+          <li><a href="https://arxiv.org/abs/2310.06770">SWE-bench: Can Language Models Resolve Real-World GitHub Issues?</a></li>
+          <li><a href="https://arxiv.org/abs/2311.12983">GAIA: a benchmark for General AI Assistants</a></li>
+          <li><a href="https://arxiv.org/abs/2504.01848">PaperBench: Evaluating AI's Ability to Replicate AI Research</a></li>
+          <li><a href="https://arxiv.org/abs/2505.19955">MLR-Bench: Evaluating AI Agents on Open-Ended Machine Learning Research</a></li>
+          <li><a href="https://arxiv.org/abs/2606.05405">Agents' Last Exam</a></li>
+          <li><a href="https://arxiv.org/abs/2604.08523">ClawBench: Can AI Agents Complete Everyday Online Tasks?</a></li>
+          <li><a href="https://github.com/TIGER-AI-Lab/ClawBench/blob/main/eval/scoring.md">ClawBench scoring.md: two-stage interception + LLM judge</a></li>
+          <li><a href="https://arxiv.org/abs/2510.04374">GDPval: Evaluating AI Model Performance on Real-World Economically Valuable Tasks</a></li>
+          <li><a href="https://arxiv.org/abs/2604.18543">ClawEnvKit / Auto-ClawEval</a></li>
+          <li><a href="https://arxiv.org/abs/2506.11763">DeepResearch Bench: A Comprehensive Benchmark for Deep Research Agents</a></li>
+          <li><a href="https://github.com/Ayanami0730/deep_research_bench">DeepResearch Bench README: RACE/FACT evaluator and human alignment notes</a></li>
+          <li><a href="https://arxiv.org/abs/2601.12346">MMDeepResearch-Bench: A Benchmark for Multimodal Deep Research Agents</a></li>
+          <li><a href="https://arxiv.org/abs/2510.00172">DRBench: A Realistic Benchmark for Enterprise Deep Research</a></li>
+          <li><a href="https://arxiv.org/abs/2508.15804">ReportBench: Evaluating Deep Research Agents via Academic Survey Tasks</a></li>
+          <li><a href="https://github.com/ByteDance-BandAI/ReportBench">ReportBench README: LLM-based citation and factuality evaluation pipeline</a></li>
+          <li><a href="https://arxiv.org/abs/2601.06676">IDRBench: Interactive Deep Research Benchmark</a></li>
+          <li><a href="https://arxiv.org/abs/2504.12516">BrowseComp: A Simple Yet Challenging Benchmark for Browsing Agents</a></li>
+          <li><a href="https://arxiv.org/abs/2602.12876">BrowseComp-V3: A Visual, Vertical, and Verifiable Benchmark for Multimodal Browsing Agents</a></li>
+        </ul>
+      </section>
+    </main>
+
+    <script>
+      const buttons = document.querySelectorAll("[data-lang]");
+      const setLanguage = (lang) => {
+        document.body.classList.toggle("show-en", lang === "en");
+        document.documentElement.lang = lang === "en" ? "en" : "zh-CN";
+        buttons.forEach((button) => {
+          button.classList.toggle("active", button.dataset.lang === lang);
+        });
+      };
+
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => setLanguage(button.dataset.lang));
+      });
+
+      const labels = {
+        zh: {
+          open: "展开",
+          close: "收起",
+          quote: "原文 quote",
+          task: "Task 定义",
+          judge: "Judge / oracle 设计",
+          related: "更多 task 定义相关原文 quote / 上下文",
+          openTitle: "Open-ended / rubric or expert judged",
+          openDesc: "没有唯一固定答案，通常评估长文报告、专业 deliverable、研究产物、交互质量或专家偏好。",
+          closedTitle: "Closed-form oracle / executable or answer oracle",
+          closedDesc: "解题路径可以开放，但最终答案、文件、环境状态、提交请求或测试结果可以被明确验证。",
+        },
+        en: {
+          open: "Expand",
+          close: "Collapse",
+          quote: "Source Quote",
+          task: "Task Definition",
+          judge: "Judge / Oracle Design",
+          related: "More Direct Task-Definition Quotes / Context",
+          openTitle: "Open-ended / rubric or expert judged",
+          openDesc: "No single fixed answer; evaluation usually uses rubrics, expert judgment, report quality, deliverable quality, or interaction-aware criteria.",
+          closedTitle: "Closed-form oracle / executable or answer oracle",
+          closedDesc: "The path may be open, but the final answer, file, state, submission request, or test result can be explicitly verified.",
+        },
+      };
+
+      const openEndedBenchmarks = new Set([
+        "PaperBench",
+        "MLR-Bench",
+        "Agents' Last Exam",
+        "GDPval / GDPBench",
+        "DeepResearch Bench",
+        "MMDeepResearch-Bench",
+        "DRBench",
+        "ReportBench",
+        "IDRBench",
+      ]);
+
+      const splitTablesByCategory = () => {
+        document.querySelectorAll("section.zh table, section.en table").forEach((table) => {
+          const section = table.closest("section");
+          const lang = section.classList.contains("zh") ? "zh" : "en";
+          const copy = labels[lang];
+          const originalWrap = table.closest(".table-wrap");
+          const thead = table.querySelector("thead");
+          const rows = [...table.querySelectorAll("tbody > tr")];
+          const groups = {
+            open: [],
+            closed: [],
+          };
+
+          rows.forEach((row) => {
+            const name = row.querySelector(".name")?.textContent.trim() || "";
+            const key = openEndedBenchmarks.has(name) ? "open" : "closed";
+            groups[key].push(row);
+          });
+
+          const container = document.createElement("div");
+          const makeBlock = (kind, title, desc) => {
+            const block = document.createElement("div");
+            block.className = "category-block";
+            const titleNode = document.createElement("div");
+            titleNode.className = "category-title";
+            titleNode.innerHTML = `<h3>${title}</h3><p>${desc}</p>`;
+            const wrap = document.createElement("div");
+            wrap.className = "table-wrap";
+            const nextTable = document.createElement("table");
+            nextTable.appendChild(thead.cloneNode(true));
+            const tbody = document.createElement("tbody");
+            groups[kind].forEach((row) => tbody.appendChild(row));
+            nextTable.appendChild(tbody);
+            wrap.appendChild(nextTable);
+            block.appendChild(titleNode);
+            block.appendChild(wrap);
+            return block;
+          };
+
+          container.appendChild(makeBlock("open", copy.openTitle, copy.openDesc));
+          container.appendChild(makeBlock("closed", copy.closedTitle, copy.closedDesc));
+          originalWrap.replaceWith(container);
+        });
+      };
+
+      splitTablesByCategory();
+
+      const evidence = {
+        zh: {
+          "Terminal-Bench": [
+            ["“Terminal-Bench 2.0: a carefully curated hard benchmark composed of 89 tasks.”", "原文直接说明 benchmark 的任务规模和难度定位。"],
+            ["“Each task features a unique environment.”", "每个 task 有独立环境。"],
+          ],
+          "CocoaBench": [
+            ["“We introduce CocoaBench, a benchmark for unified digital agents.”", "原文直接定义 CocoaBench 的对象是 unified digital agents。"],
+            ["“Tasks are specified only by an instruction and an automatic evaluation function.”", "task interface 被压缩为 instruction + evaluator。"],
+          ],
+          "OSWorld": [
+            ["“OSWorld can serve as a unified, integrated computer environment.”", "原文把 OSWorld 定义成统一的真实电脑环境。"],
+            ["“Each task example is derived from real-world computer use cases.”", "task example 的来源是真实电脑使用场景。"],
+          ],
+          "SWE-bench": [
+            ["“Given a codebase along with a description of an issue to be resolved.”", "任务输入是代码库和 issue 描述。"],
+            ["“A language model is tasked with editing the codebase.”", "任务动作是编辑代码库。"],
+          ],
+          "GAIA": [
+            ["“GAIA proposes real-world questions.”", "任务形式是现实世界问题。"],
+            ["“Using GAIA's methodology, we devise 466 questions and their answer.”", "题目和答案都被明确构造。"],
+          ],
+          "PaperBench": [
+            ["“Agents must replicate 20 ICML 2024 Spotlight and Oral papers from scratch.”", "任务目标是从零复现论文。"],
+            ["“PaperBench contains 8,316 individually gradable tasks.”", "复杂复现任务被拆为可单独评分项。"],
+          ],
+          "MLR-Bench": [
+            ["“MLR-Bench includes three key components.”", "原文把 benchmark 拆成任务、judge、agent scaffold。"],
+            ["“Our framework supports both stepwise assessment ... and end-to-end evaluation.”", "评估既支持阶段性，也支持最终论文。"],
+          ],
+          "Agents' Last Exam": [
+            ["“ALE covers non-physical industries.”", "任务范围限定在非体力行业。"],
+            ["“It is organized around a task taxonomy.”", "任务池按 taxonomy 组织。"],
+          ],
+          "ClawBench": [
+            ["“Scoring is two stages applied in order.”", "scoring.md 明确说明是两阶段评分。"],
+            ["“A request interceptor runs inside the sandbox container.”", "Stage 1 是 sandbox 内 request interceptor。"],
+            ["“For every run where `intercepted: true`, an LLM judge reviews the intercepted body.”", "Stage 2 是 LLM judge 检查 intercepted body。"],
+            ["“final_pass = intercepted AND (judge_match is True)”", "最终通过要求 interception 和 judge match 同时为真。"],
+          ],
+          "GDPval / GDPBench": [
+            ["“Our primary evaluation metric is head-to-head human expert comparison.”", "论文主指标确实是人类专家成对比较。"],
+            ["“We open-source the prompts and reference files in our 220-task gold subset.”", "公开复现依赖 gold subset，而不是完整专家评估流程。"],
+            ["“We make an experimental automated grader publicly available.”", "自动 grader 是公开服务，但论文明确称 experimental。"],
+          ],
+          "Auto-ClawEval / ClawEnvKit": [
+            ["“The pipeline comprises three modules.”", "环境生成 pipeline 被拆为三个模块。"],
+            ["“Using ClawEnvKit, we construct Auto-ClawEval.”", "Auto-ClawEval 是由 ClawEnvKit 生成的 benchmark。"],
+          ],
+          "DeepResearch Bench": [
+            ["“RACE evaluates report generation quality through a sophisticated multi-step process.”", "RACE 是 report-quality evaluator。"],
+            ["“Automatically generates task-specific evaluation criteria across four key dimensions.”", "criteria 是动态生成的，覆盖四个维度。"],
+            ["“Uses web scraping and LLM judgment to verify whether cited sources actually support the claims.”", "FACT 里 citation support verification 用 web scraping + LLM judgment。"],
+            ["“Human inter-annotator agreement baseline = 68.78%.”", "README 报告了 human-annotated subset 上的人类一致性 baseline。"],
+          ],
+          "MMDeepResearch-Bench": [
+            ["“Each task provides an image-text bundle.”", "每个任务提供图文 bundle。"],
+            ["“MMDR-Bench emphasizes report-style synthesis with explicit evidence use.”", "任务输出是强调证据使用的报告式综合。"],
+          ],
+          "DRBench": [
+            ["“Tasks are generated through a carefully designed synthesis pipeline with human-in-the-loop verification.”", "human-in-loop 明确用于 task generation / verification。"],
+            ["“Agents are evaluated on their ability to recall relevant insights, maintain factual accuracy, and produce coherent, well-structured reports.”", "abstract 给出评估维度，但未说明具体 LLM judge / human agreement。"],
+          ],
+          "ReportBench": [
+            ["“Use an LLM to determine whether each URL corresponds to a scholarly article.”", "content-quality pipeline 中有 LLM classification。"],
+            ["“Semantic Matching: Use an LLM to locate supporting passages and verify consistency.”", "cited-statement verification 用 LLM。"],
+            ["“Web-Connected Fact Checking: Query multiple web-connected LLMs.”", "non-cited claims 用 web-connected LLMs fact-check。"],
+          ],
+          "IDRBench": [
+            ["“A scalable reference-grounded user simulator.”", "评估包含 reference-grounded user simulator。"],
+            ["“An interaction-aware evaluation suite.”", "评估 suite 显式考虑 interaction。"],
+            ["“Jointly measures interaction benefits ... and costs.”", "同时评估 quality/alignment 和 turns/tokens 成本。"],
+          ],
+          "BrowseComp": [
+            ["“BrowseComp comprises 1,266 questions.”", "任务集合是 1,266 个浏览问题。"],
+            ["“Predicted answers are short and easily verifiable.”", "closed oracle 来自短答案可验证。"],
+          ],
+          "BrowseComp-V3": [
+            ["“All supporting evidence is strictly required to be publicly searchable.”", "证据必须公开可搜索。"],
+            ["“Beyond final-answer accuracy, we incorporate ... process evaluation.”", "除了最终答案，还评估过程。"],
+          ],
+        },
+        en: {
+          "Terminal-Bench": [
+            ["“Terminal-Bench 2.0: a carefully curated hard benchmark composed of 89 tasks.”", "The quote directly states task count and difficulty positioning."],
+            ["“Each task features a unique environment.”", "Each task has its own environment."],
+          ],
+          "CocoaBench": [
+            ["“We introduce CocoaBench, a benchmark for unified digital agents.”", "The benchmark target is unified digital agents."],
+            ["“Tasks are specified only by an instruction and an automatic evaluation function.”", "The task interface is instruction plus evaluator."],
+          ],
+          "OSWorld": [
+            ["“OSWorld can serve as a unified, integrated computer environment.”", "OSWorld is defined as a unified real computer environment."],
+            ["“Each task example is derived from real-world computer use cases.”", "Task examples come from real computer-use cases."],
+          ],
+          "SWE-bench": [
+            ["“Given a codebase along with a description of an issue to be resolved.”", "The input is a codebase plus issue description."],
+            ["“A language model is tasked with editing the codebase.”", "The action is editing the codebase."],
+          ],
+          "GAIA": [
+            ["“GAIA proposes real-world questions.”", "The task form is real-world questions."],
+            ["“Using GAIA's methodology, we devise 466 questions and their answer.”", "Questions and answers are explicitly constructed."],
+          ],
+          "PaperBench": [
+            ["“Agents must replicate 20 ICML 2024 Spotlight and Oral papers from scratch.”", "The task target is from-scratch paper replication."],
+            ["“PaperBench contains 8,316 individually gradable tasks.”", "The replication work is decomposed into gradable units."],
+          ],
+          "MLR-Bench": [
+            ["“MLR-Bench includes three key components.”", "The benchmark consists of tasks, judge, and agent scaffold."],
+            ["“Our framework supports both stepwise assessment ... and end-to-end evaluation.”", "It supports both stagewise and final-paper evaluation."],
+          ],
+          "Agents' Last Exam": [
+            ["“ALE covers non-physical industries.”", "The benchmark scope is non-physical industries."],
+            ["“It is organized around a task taxonomy.”", "The task pool is taxonomy-organized."],
+          ],
+          "ClawBench": [
+            ["“Scoring is two stages applied in order.”", "scoring.md states that scoring is two-stage."],
+            ["“A request interceptor runs inside the sandbox container.”", "Stage 1 is a sandbox request interceptor."],
+            ["“For every run where `intercepted: true`, an LLM judge reviews the intercepted body.”", "Stage 2 is an LLM judge over the intercepted body."],
+            ["“final_pass = intercepted AND (judge_match is True)”", "Final pass requires both interception and judge match."],
+          ],
+          "GDPval / GDPBench": [
+            ["“Our primary evaluation metric is head-to-head human expert comparison.”", "The paper's headline metric is human expert pairwise comparison."],
+            ["“We open-source the prompts and reference files in our 220-task gold subset.”", "Public reproducibility is through the gold subset, not the full expert pipeline."],
+            ["“We make an experimental automated grader publicly available.”", "The automated grader is public but explicitly experimental."],
+          ],
+          "Auto-ClawEval / ClawEnvKit": [
+            ["“The pipeline comprises three modules.”", "The environment-generation pipeline has three modules."],
+            ["“Using ClawEnvKit, we construct Auto-ClawEval.”", "Auto-ClawEval is built with ClawEnvKit."],
+          ],
+          "DeepResearch Bench": [
+            ["“RACE evaluates report generation quality through a sophisticated multi-step process.”", "RACE is the report-quality evaluator."],
+            ["“Automatically generates task-specific evaluation criteria across four key dimensions.”", "Criteria are dynamically generated across four dimensions."],
+            ["“Uses web scraping and LLM judgment to verify whether cited sources actually support the claims.”", "FACT uses web scraping plus LLM judgment for citation support verification."],
+            ["“Human inter-annotator agreement baseline = 68.78%.”", "The README reports a human agreement baseline on a human-annotated subset."],
+          ],
+          "MMDeepResearch-Bench": [
+            ["“Formula-LLM Adaptive Evaluation (FLAE) for report quality.”", "FLAE explicitly uses Formula-LLM for report quality."],
+            ["“TRACE for citation-grounded evidence alignment.”", "TRACE evaluates citation-evidence alignment."],
+            ["“MOSAIC for text-visual integrity.”", "MOSAIC checks text-visual integrity."],
+          ],
+          "DRBench": [
+            ["“Tasks are generated through a carefully designed synthesis pipeline with human-in-the-loop verification.”", "Human-in-loop is described for task generation / verification."],
+            ["“Agents are evaluated on their ability to recall relevant insights, maintain factual accuracy, and produce coherent, well-structured reports.”", "The abstract states dimensions but not a concrete LLM judge / human agreement protocol."],
+          ],
+          "ReportBench": [
+            ["“Use an LLM to determine whether each URL corresponds to a scholarly article.”", "The content-quality pipeline uses LLM classification."],
+            ["“Semantic Matching: Use an LLM to locate supporting passages and verify consistency.”", "Cited-statement verification uses an LLM."],
+            ["“Web-Connected Fact Checking: Query multiple web-connected LLMs.”", "Non-cited claims are fact-checked by web-connected LLMs."],
+          ],
+          "IDRBench": [
+            ["“A scalable reference-grounded user simulator.”", "Evaluation includes a reference-grounded user simulator."],
+            ["“An interaction-aware evaluation suite.”", "The evaluation suite explicitly models interaction."],
+            ["“Jointly measures interaction benefits ... and costs.”", "It jointly measures quality/alignment and turn/token costs."],
+          ],
+          "BrowseComp": [
+            ["“BrowseComp comprises 1,266 questions.”", "The task set contains 1,266 browsing questions."],
+            ["“Predicted answers are short and easily verifiable.”", "The closed oracle comes from verifiable short answers."],
+          ],
+          "BrowseComp-V3": [
+            ["“All supporting evidence is strictly required to be publicly searchable.”", "Supporting evidence must be publicly searchable."],
+            ["“Beyond final-answer accuracy, we incorporate ... process evaluation.”", "Evaluation goes beyond final answer accuracy."],
+          ],
+        },
+      };
+
+      document.querySelectorAll("section.zh table, section.en table").forEach((table) => {
+        const lang = table.closest("section").classList.contains("zh") ? "zh" : "en";
+        const copy = labels[lang];
+        const rows = [...table.querySelectorAll("tbody > tr")];
+
+        rows.forEach((row, index) => {
+          const quote = row.querySelector(".quote blockquote")?.textContent.trim() || "";
+          const source = row.querySelector(".source")?.textContent.trim() || "";
+          const task = row.querySelector(".task")?.innerHTML.trim() || "";
+          const judge = row.querySelector(".judge")?.innerHTML.trim() || "";
+          const name = row.querySelector(".name")?.textContent.trim() || "";
+          const related = evidence[lang][name] || [];
+          const relatedHtml = related
+            .map(([quoteText, note]) => `
+              <li>
+                <span class="evidence-quote">${quoteText}</span>
+                <span class="evidence-note">${note}</span>
+              </li>
+            `)
+            .join("");
+          const buttonCell = document.createElement("td");
+          buttonCell.className = "expand-cell";
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "expand-button";
+          button.setAttribute("aria-expanded", "false");
+          button.textContent = copy.open;
+          buttonCell.appendChild(button);
+          row.insertBefore(buttonCell, row.firstElementChild);
+
+          const detailRow = document.createElement("tr");
+          detailRow.className = "detail-row";
+          const detailCell = document.createElement("td");
+          detailCell.className = "detail-cell";
+          detailCell.colSpan = 6;
+          detailCell.innerHTML = `
+            <div class="detail-panel">
+              <article class="detail-box">
+                <h3>${copy.quote}</h3>
+                <p>${quote}</p>
+                <span class="source">${source}</span>
+              </article>
+              <article class="detail-box">
+                <h3>${copy.task}</h3>
+                <div>${task}</div>
+              </article>
+              <article class="detail-box">
+                <h3>${copy.judge}</h3>
+                <div>${judge}</div>
+              </article>
+              <article class="detail-box detail-wide">
+                <h3>${copy.related}</h3>
+                <ul class="evidence-list">${relatedHtml}</ul>
+              </article>
+            </div>
+          `;
+          detailRow.appendChild(detailCell);
+          row.after(detailRow);
+
+          const detailId = `${lang}-detail-${index}`;
+          detailRow.id = detailId;
+          button.setAttribute("aria-controls", detailId);
+          button.addEventListener("click", () => {
+            const isOpen = detailRow.classList.toggle("open");
+            button.setAttribute("aria-expanded", String(isOpen));
+            button.textContent = isOpen ? copy.close : copy.open;
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
