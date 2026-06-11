@@ -409,6 +409,77 @@
         </div>
 
         <div class="section-title">
+          <h2>Scoring Patterns From Existing Benchmarks</h2>
+          <p>Different open-ended tasks need different scoring contracts. The useful distinction is not open vs closed, but which part of the output can be grounded, tested, judged, or compared.</p>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <span class="tag">Pattern 1</span>
+            <h3>Executable or Deterministic Oracle</h3>
+            <ul>
+              <li>Best for: code, terminal, file, data, or environment-state tasks</li>
+              <li>Mechanism: tests, validators, scripts, schema checks, exact/normalized answer matching</li>
+              <li>Requirement: verifier must localize failure and avoid shallow keyword checks</li>
+              <li>Representative papers: Terminal-Bench, SWE-bench, OSWorld, GAIA, BrowseComp</li>
+            </ul>
+          </article>
+          <article class="card">
+            <span class="tag">Pattern 2</span>
+            <h3>Captured Final Action + LLM Judge</h3>
+            <ul>
+              <li>Best for: live web or form-submission tasks where real-world side effects must be blocked</li>
+              <li>Mechanism: deterministic capture first, semantic judgment second</li>
+              <li>Requirement: final pass should require both captured action and judge match</li>
+              <li>Representative paper: ClawBench, with request interception plus LLM judge over intercepted body</li>
+            </ul>
+          </article>
+          <article class="card">
+            <span class="tag">Pattern 3</span>
+            <h3>Claim / Citation Grounding</h3>
+            <ul>
+              <li>Best for: research reports, market analysis, technical surveys, evidence-heavy deliverables</li>
+              <li>Mechanism: extract claims, map claims to citations, verify source support, detect unsupported claims</li>
+              <li>Requirement: output must expose claims and evidence; judge must report unsupported or contradicted claims</li>
+              <li>Representative papers: DeepResearch Bench FACT, ReportBench, MMDeepResearch-Bench TRACE/MOSAIC</li>
+            </ul>
+          </article>
+          <article class="card">
+            <span class="tag">Pattern 4</span>
+            <h3>Rubric Decomposition With Partial Credit</h3>
+            <ul>
+              <li>Best for: complex deliverables where no single test captures success</li>
+              <li>Mechanism: decompose task into atomic criteria, score each criterion, aggregate partial credit</li>
+              <li>Requirement: criteria must be observable, falsifiable, and tied to deliverable fields or artifacts</li>
+              <li>Representative papers: PaperBench, MLR-Bench, DeepResearch Bench RACE</li>
+            </ul>
+          </article>
+          <article class="card">
+            <span class="tag">Pattern 5</span>
+            <h3>LLM Judge With Human Calibration</h3>
+            <ul>
+              <li>Best for: quality judgments that are hard to encode as tests but can be rubric-scored</li>
+              <li>Mechanism: LLM judge scores rubric criteria; human-labeled subset checks alignment or disagreement</li>
+              <li>Requirement: report judge model, prompt, rubric, validation set, agreement rate, and failure examples</li>
+              <li>Representative papers: DeepResearch Bench RACE/FACT; ClawBench LLM judge; HealthBench-style rubric validation is also a useful analogy</li>
+            </ul>
+          </article>
+          <article class="card">
+            <span class="tag">Pattern 6</span>
+            <h3>Expert Pairwise Preference</h3>
+            <ul>
+              <li>Best for: professional deliverables where expert taste and domain usefulness matter</li>
+              <li>Mechanism: blinded pairwise comparison, ranking, and written justification by domain experts</li>
+              <li>Requirement: expensive; reproducibility needs public subsets, grader services, or released pairwise labels</li>
+              <li>Representative paper: GDPval</li>
+            </ul>
+          </article>
+        </div>
+
+        <p class="note">
+          For EvolveBench, the safest default is hybrid scoring: hard gates and objective grounding first, then LLM/rubric scoring only on outputs that passed the grounding checks.
+        </p>
+
+        <div class="section-title">
           <h2>Scoring Contract</h2>
           <p>A task is benchmark-ready only if it declares how its output will be inspected.</p>
         </div>
@@ -571,6 +642,77 @@ scoring:
             </ul>
           </article>
         </div>
+
+        <div class="section-title">
+          <h2>已有 Benchmark 的 Scoring Patterns</h2>
+          <p>不同 open-ended task 需要不同 scoring contract。关键不是 open vs closed，而是输出中的哪一部分可以被 grounded、tested、judged 或 compared。</p>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <span class="tag">Pattern 1</span>
+            <h3>Executable or Deterministic Oracle</h3>
+            <ul>
+              <li>适合：代码、terminal、文件、数据、环境状态任务</li>
+              <li>机制：tests、validators、scripts、schema checks、exact/normalized answer matching</li>
+              <li>要求：verifier 要能定位失败原因，不能只做浅层关键词检查</li>
+              <li>代表 paper：Terminal-Bench、SWE-bench、OSWorld、GAIA、BrowseComp</li>
+            </ul>
+          </article>
+          <article class="card">
+            <span class="tag">Pattern 2</span>
+            <h3>Captured Final Action + LLM Judge</h3>
+            <ul>
+              <li>适合：真实网页、表单提交、会产生现实副作用的任务</li>
+              <li>机制：先 deterministic capture，再 semantic judgment</li>
+              <li>要求：final pass 应同时要求 captured action 和 judge match</li>
+              <li>代表 paper：ClawBench，用 request interception + LLM judge 检查 intercepted body</li>
+            </ul>
+          </article>
+          <article class="card">
+            <span class="tag">Pattern 3</span>
+            <h3>Claim / Citation Grounding</h3>
+            <ul>
+              <li>适合：research report、market analysis、technical survey、evidence-heavy deliverable</li>
+              <li>机制：抽取 claims，映射 citations，验证 source support，检测 unsupported claims</li>
+              <li>要求：output 必须暴露 claims 和 evidence；judge 要报告 unsupported 或 contradicted claims</li>
+              <li>代表 paper：DeepResearch Bench FACT、ReportBench、MMDeepResearch-Bench TRACE/MOSAIC</li>
+            </ul>
+          </article>
+          <article class="card">
+            <span class="tag">Pattern 4</span>
+            <h3>Rubric Decomposition With Partial Credit</h3>
+            <ul>
+              <li>适合：没有单一测试能覆盖成功标准的复杂 deliverable</li>
+              <li>机制：把 task 拆成 atomic criteria，逐项评分，再聚合 partial credit</li>
+              <li>要求：criteria 必须 observable、falsifiable，并绑定到 output field 或 artifact</li>
+              <li>代表 paper：PaperBench、MLR-Bench、DeepResearch Bench RACE</li>
+            </ul>
+          </article>
+          <article class="card">
+            <span class="tag">Pattern 5</span>
+            <h3>LLM Judge With Human Calibration</h3>
+            <ul>
+              <li>适合：难以写成 deterministic test，但可以 rubric-score 的质量判断</li>
+              <li>机制：LLM judge 打 rubric 分；human-labeled subset 检查 alignment 或 disagreement</li>
+              <li>要求：报告 judge model、prompt、rubric、validation set、agreement rate 和 failure examples</li>
+              <li>代表 paper：DeepResearch Bench RACE/FACT、ClawBench LLM judge；HealthBench-style rubric validation 也可作为类比</li>
+            </ul>
+          </article>
+          <article class="card">
+            <span class="tag">Pattern 6</span>
+            <h3>Expert Pairwise Preference</h3>
+            <ul>
+              <li>适合：专业 deliverable，专家 taste 和 domain usefulness 很重要</li>
+              <li>机制：domain experts 做 blinded pairwise comparison、ranking 和 written justification</li>
+              <li>要求：成本高；reproducibility 需要 public subset、grader service 或 released pairwise labels</li>
+              <li>代表 paper：GDPval</li>
+            </ul>
+          </article>
+        </div>
+
+        <p class="note">
+          对 EvolveBench 来说，最稳妥的默认是 hybrid scoring：先 hard gates 和 objective grounding，再只对通过 grounding checks 的输出做 LLM/rubric scoring。
+        </p>
 
         <div class="section-title">
           <h2>Scoring Contract</h2>
